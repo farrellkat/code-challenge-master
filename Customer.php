@@ -39,20 +39,18 @@ class Customer
     }
 
     /**
-     * @return string
+     * @return array
      */
-    public function statement()
+    public function totals()
     {
         $totalAmount = 0;
         $frequentRenterPoints = 0;
         $rentalAmounts = array();
 
-        $result = 'Rental Record for ' . $this->name() . PHP_EOL;
-
         foreach ($this->rentals as $rental) {
             $thisAmount = 0;
             $rentalName = $rental->movie()->name();
-        
+
 
             switch ($rental->movie()->priceCode()) {
                 case Movie::REGULAR:
@@ -72,19 +70,33 @@ class Customer
                     break;
             }
             $totalAmount += $thisAmount;
-            
+
             $frequentRenterPoints++;
             if ($rental->movie()->priceCode() === Movie::NEW_RELEASE && $rental->daysRented() > 1) {
                 $frequentRenterPoints++;
             }
-            
-            $rentalAmounts[$rentalName] = $thisAmount;
-            $result .= "\t" . str_pad($rentalName, 30, ' ', STR_PAD_RIGHT) . "\t" . $thisAmount . PHP_EOL;
-        }
-        $result .= 'Amount owed is ' . $totalAmount . PHP_EOL;
-        $result .= 'You earned ' . $frequentRenterPoints . ' frequent renter points' . PHP_EOL;
 
-        $this->htmlStatement($rentalAmounts, $totalAmount, $frequentRenterPoints);
+            $rentalAmounts[$rentalName] = $thisAmount;
+        }
+        return [
+            'totalAmount' => $totalAmount,
+            'frequentRenterPoints' => $frequentRenterPoints,
+            'rentalAmounts' => $rentalAmounts
+        ];
+    }
+
+    /**
+     * @return string
+     */
+    public function statement()
+    {
+        $totals = $this->totals();
+        $result = 'Rental Record for ' . $this->name() . PHP_EOL;
+        foreach ($totals['rentalAmounts'] as $rental => $amount) {
+            $result .= "\t" . str_pad($rental, 30, ' ', STR_PAD_RIGHT) . "\t" . $amount . PHP_EOL;
+        }
+        $result .= 'Amount owed is ' . $totals['totalAmount'] . PHP_EOL;
+        $result .= 'You earned ' . $totals['frequentRenterPoints'] . ' frequent renter points' . PHP_EOL;
 
         return $result;
     }
@@ -92,19 +104,19 @@ class Customer
     /**
      * @return string
      */
-    public function htmlStatement($rentalAmounts, $totalAmount, $frequentRenterPoints)
+    public function htmlStatement()
     {
         $formattedRentals = null;
-
-        foreach ($rentalAmounts as $rental => $amount) {
+        $totals = $this->totals();
+        foreach ($totals['rentalAmounts'] as $rental => $amount) {
 
             $formattedRentals .= "<li>{$rental} - " . toDollar($amount) . "</li>";
         }
         $result = "
             <h1>Rental Record for <em>$this->name</em></h1>
             <ul>$formattedRentals</ul>
-            <p>Amount owed is <em>" . toDollar($totalAmount) . "</em></p>
-            <p>You earned <em>$frequentRenterPoints</em> frequent renter points</p>";
+            <p>Amount owed is <em>" . toDollar($totals['totalAmount']) . "</em></p>
+            <p>You earned <em>{$totals['frequentRenterPoints']}</em> frequent renter points</p>";
 
         echo $result;
     }
