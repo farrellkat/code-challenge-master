@@ -33,21 +33,21 @@ class PriceCode
         $this->value = $value;
     }
 
-     /**
+    /**
      * @return string
      */
     public function name()
     {
         return $this->name;
     }
-     /**
+    /**
      * @return float
      */
     public function price()
     {
         return $this->price;
     }
-     /**
+    /**
      * @return bool
      */
     public function bonus()

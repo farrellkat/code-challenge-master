@@ -41,6 +41,10 @@ class Customer
     /**
      * @return array
      */
+
+    //Broke all the logic out of statement() and htmlStatement() so as to keep the programming DRY
+    //statementCalc() returns an array of key value pairs of the important data to be used in the templates
+
     public function statementCalc()
     {
         $totalAmountOwed = 0;
@@ -52,21 +56,24 @@ class Customer
             $movieName = $rental->movie()->name();
             $priceCode = $rental->movie()->priceCode();
             $bonus = $priceCode->bonus();
-            $priceCodeName = $priceCode->name();
+            $value = $priceCode->value();
             $price = $priceCode->price();
 
+            // by creating it's own class of PriceCode, these settings can be set dynamically from the index.
+            // multiple genres can be assined to a $value so that you don't have to add every single genre to the switch
+            // Price is also derived from the PriceCode class so that rentals can have matching $values but different prices.
 
-            switch ($priceCodeName) {
-                case 'REGULAR':
+            switch ($value) {
+                case 0:
                     $thisAmount += 2;
                     if ($rental->daysRented() > 2) {
                         $thisAmount += ($rental->daysRented() - 2) * $price;
                     }
                     break;
-                case 'NEW_RELEASE':
+                case 1:
                     $thisAmount += $rental->daysRented() * $price;
                     break;
-                case 'CHILDRENS':
+                case 2:
                     $thisAmount += 1.5;
                     if ($rental->daysRented() > 3) {
                         $thisAmount += ($rental->daysRented() - 3) * $price;
@@ -74,6 +81,11 @@ class Customer
                     break;
             }
             $totalAmountOwed += $thisAmount;
+
+            // Instead of the bonus being tied to a specific genre which has to be hardcoded,
+            // I created a boolean called bonus flag in the PriceCode. If true it gets the bonus.
+            // This allows for ease of use because you only have to change it in the index.
+            // It also allows you to easily allow multiple PriceCodes to have bonuses
 
             $frequentRenterPoints++;
             if ($bonus === true && $rental->daysRented() > 1) {
@@ -92,6 +104,9 @@ class Customer
     /**
      * @return string
      */
+
+    //Replaced all variables with variables that come from statementCalc() 
+
     public function statement()
     {
         $statementCalc = $this->statementCalc();
@@ -108,19 +123,25 @@ class Customer
     /**
      * @return string
      */
+
+    //Replaced all variables with variables that come from statementCalc()
+    //The list of rentals get formatted and placed into their own variable to more easily be inserted into a <ul>
+    //This also makes the html output easier to read.
+    //Created and imported a function called toDollar() that formats the $amount correctly for a receipt.
+
     public function htmlStatement()
     {
         $formattedRentals = null;
         $statementCalc = $this->statementCalc();
         foreach ($statementCalc['rentalAmountsOwed'] as $rental => $amount) {
 
-            $formattedRentals .= "<li>{$rental} - " . toDollar($amount) . "</li>";
+            $formattedRentals .= "\t" . "<li>{$rental} - " . toDollar($amount) . "\t" . "</li>" . PHP_EOL;
         }
-        $result = "
-            <h1>Rental Record for <em>$this->name</em></h1>
-            <ul>$formattedRentals</ul>
-            <p>Amount owed is <em>" . toDollar($statementCalc['totalAmountOwed']) . "</em></p>
-            <p>You earned <em>{$statementCalc['frequentRenterPoints']}</em> frequent renter points</p>";
+        $result =
+            "<h1>Rental Record for <em>$this->name</em></h1>" . PHP_EOL .
+            "<ul>" . PHP_EOL . str_pad("$formattedRentals", 30, ' ', STR_PAD_RIGHT) . "</ul>" . PHP_EOL .
+            "<p>Amount owed is <em>" . toDollar($statementCalc['totalAmountOwed']) . "</em></p>" . PHP_EOL .
+            "<p>You earned <em>{$statementCalc['frequentRenterPoints']}</em> frequent renter points</p>";
 
         echo $result;
     }

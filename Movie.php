@@ -8,6 +8,7 @@ class Movie
      */
     private $name;
 
+    // replaced the string priceCode with the class PriceCode
     /**
      * @var PriceCode
      */
