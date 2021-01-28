@@ -41,47 +41,50 @@ class Customer
     /**
      * @return array
      */
-    public function totals()
+    public function statementCalc()
     {
-        $totalAmount = 0;
+        $totalAmountOwed = 0;
         $frequentRenterPoints = 0;
-        $rentalAmounts = array();
+        $rentalAmountsOwed = array();
 
         foreach ($this->rentals as $rental) {
             $thisAmount = 0;
-            $rentalName = $rental->movie()->name();
+            $movieName = $rental->movie()->name();
+            $priceCode = $rental->movie()->priceCode();
+            $name = $priceCode->name();
+            $price = $priceCode->price();
 
 
-            switch ($rental->movie()->priceCode()) {
-                case Movie::REGULAR:
+            switch ($name) {
+                case 'REGULAR':
                     $thisAmount += 2;
                     if ($rental->daysRented() > 2) {
-                        $thisAmount += ($rental->daysRented() - 2) * 1.5;
+                        $thisAmount += ($rental->daysRented() - 2) * $price;
                     }
                     break;
-                case Movie::NEW_RELEASE:
-                    $thisAmount += $rental->daysRented() * 3;
+                case 'NEW_RELEASE':
+                    $thisAmount += $rental->daysRented() * $price;
                     break;
-                case Movie::CHILDRENS:
+                case 'CHILDRENS':
                     $thisAmount += 1.5;
                     if ($rental->daysRented() > 3) {
-                        $thisAmount += ($rental->daysRented() - 3) * 1.5;
+                        $thisAmount += ($rental->daysRented() - 3) * $price;
                     }
                     break;
             }
-            $totalAmount += $thisAmount;
+            $totalAmountOwed += $thisAmount;
 
             $frequentRenterPoints++;
-            if ($rental->movie()->priceCode() === Movie::NEW_RELEASE && $rental->daysRented() > 1) {
+            if ($name === 'NEW_RELEASE' && $rental->daysRented() > 1) {
                 $frequentRenterPoints++;
             }
 
-            $rentalAmounts[$rentalName] = $thisAmount;
+            $rentalAmountsOwed[$movieName] = $thisAmount;
         }
         return [
-            'totalAmount' => $totalAmount,
+            'totalAmountOwed' => $totalAmountOwed,
             'frequentRenterPoints' => $frequentRenterPoints,
-            'rentalAmounts' => $rentalAmounts
+            'rentalAmountsOwed' => $rentalAmountsOwed
         ];
     }
 
@@ -90,13 +93,13 @@ class Customer
      */
     public function statement()
     {
-        $totals = $this->totals();
+        $statementCalc = $this->statementCalc();
         $result = 'Rental Record for ' . $this->name() . PHP_EOL;
-        foreach ($totals['rentalAmounts'] as $rental => $amount) {
+        foreach ($statementCalc['rentalAmountsOwed'] as $rental => $amount) {
             $result .= "\t" . str_pad($rental, 30, ' ', STR_PAD_RIGHT) . "\t" . $amount . PHP_EOL;
         }
-        $result .= 'Amount owed is ' . $totals['totalAmount'] . PHP_EOL;
-        $result .= 'You earned ' . $totals['frequentRenterPoints'] . ' frequent renter points' . PHP_EOL;
+        $result .= 'Amount owed is ' . $statementCalc['totalAmountOwed'] . PHP_EOL;
+        $result .= 'You earned ' . $statementCalc['frequentRenterPoints'] . ' frequent renter points' . PHP_EOL;
 
         return $result;
     }
@@ -107,16 +110,16 @@ class Customer
     public function htmlStatement()
     {
         $formattedRentals = null;
-        $totals = $this->totals();
-        foreach ($totals['rentalAmounts'] as $rental => $amount) {
+        $statementCalc = $this->statementCalc();
+        foreach ($statementCalc['rentalAmountsOwed'] as $rental => $amount) {
 
             $formattedRentals .= "<li>{$rental} - " . toDollar($amount) . "</li>";
         }
         $result = "
             <h1>Rental Record for <em>$this->name</em></h1>
             <ul>$formattedRentals</ul>
-            <p>Amount owed is <em>" . toDollar($totals['totalAmount']) . "</em></p>
-            <p>You earned <em>{$totals['frequentRenterPoints']}</em> frequent renter points</p>";
+            <p>Amount owed is <em>" . toDollar($statementCalc['totalAmountOwed']) . "</em></p>
+            <p>You earned <em>{$statementCalc['frequentRenterPoints']}</em> frequent renter points</p>";
 
         echo $result;
     }

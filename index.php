@@ -3,25 +3,30 @@
 require_once('Movie.php');
 require_once('Rental.php');
 require_once('Customer.php');
+require_once('PriceCode.php');
+
+$childrens = new PriceCode('CHILDRENS', 1.5, 2);
+$regular = new PriceCode('REGULAR', 1.5, 0);
+$newRelease = new PriceCode('NEW_RELEASE', 3, 1);
 
 $rental1 = new Rental(
     new Movie(
         'Back to the Future',
-        Movie::CHILDRENS
+        $childrens
     ), 4
 );
 
 $rental2 = new Rental(
     new Movie(
         'Office Space',
-        Movie::REGULAR
+        $regular
     ), 3
 );
 
 $rental3 = new Rental(
     new Movie(
         'The Big Lebowski',
-        Movie::NEW_RELEASE
+        $newRelease
     ), 5
 );
 
