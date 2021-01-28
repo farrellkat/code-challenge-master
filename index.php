@@ -5,9 +5,9 @@ require_once('Rental.php');
 require_once('Customer.php');
 require_once('PriceCode.php');
 
-$childrens = new PriceCode('CHILDRENS', 1.5, 2);
-$regular = new PriceCode('REGULAR', 1.5, 0);
-$newRelease = new PriceCode('NEW_RELEASE', 3, 1);
+$childrens = new PriceCode('CHILDRENS', 1.5, false, 2);
+$regular = new PriceCode('REGULAR', 1.5, false, 0);
+$newRelease = new PriceCode('NEW_RELEASE', 3, true, 1);
 
 $rental1 = new Rental(
     new Movie(

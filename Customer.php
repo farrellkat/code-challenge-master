@@ -51,11 +51,12 @@ class Customer
             $thisAmount = 0;
             $movieName = $rental->movie()->name();
             $priceCode = $rental->movie()->priceCode();
-            $name = $priceCode->name();
+            $bonus = $priceCode->bonus();
+            $priceCodeName = $priceCode->name();
             $price = $priceCode->price();
 
 
-            switch ($name) {
+            switch ($priceCodeName) {
                 case 'REGULAR':
                     $thisAmount += 2;
                     if ($rental->daysRented() > 2) {
@@ -75,7 +76,7 @@ class Customer
             $totalAmountOwed += $thisAmount;
 
             $frequentRenterPoints++;
-            if ($name === 'NEW_RELEASE' && $rental->daysRented() > 1) {
+            if ($bonus === true && $rental->daysRented() > 1) {
                 $frequentRenterPoints++;
             }
 
