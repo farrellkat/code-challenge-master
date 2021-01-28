@@ -128,6 +128,7 @@ class Customer
     //The list of rentals get formatted and placed into their own variable to more easily be inserted into a <ul>
     //This also makes the html output easier to read.
     //Created and imported a function called toDollar() that formats the $amount correctly for a receipt.
+    //Add all the extra php nonsense to make the html line up properly in the console. Definitely overkill.
 
     public function htmlStatement()
     {
