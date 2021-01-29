@@ -65,7 +65,7 @@ class Customer
 
             switch ($value) {
                 case 0:
-                    $thisAmount += 2;
+                    $thisAmount += $price;
                     if ($rental->daysRented() > 2) {
                         $thisAmount += ($rental->daysRented() - 2) * $price;
                     }
@@ -74,7 +74,7 @@ class Customer
                     $thisAmount += $rental->daysRented() * $price;
                     break;
                 case 2:
-                    $thisAmount += 1.5;
+                    $thisAmount += $price;
                     if ($rental->daysRented() > 3) {
                         $thisAmount += ($rental->daysRented() - 3) * $price;
                     }
